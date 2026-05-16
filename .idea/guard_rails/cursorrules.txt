@@ -1,0 +1,202 @@
+# .cursorrules — Hackathon ADS: Sistema de Triagem Assistida por IA
+# Versão: 1.0 | Gerado em Plan Mode ANTES de qualquer código
+# LEIA ESTE ARQUIVO INTEIRO ANTES DE GERAR QUALQUER CÓDIGO OU DOCUMENTO.
+
+---
+
+## IDENTIDADE DO PROJETO
+
+- **Nome:** Sistema de Triagem Assistida por IA
+- **Objetivo:** Classificar prioridade de encaminhamento clínico (baixa | media | alta | urgente)
+- **Aviso ético:** Sistema DEMONSTRATIVO. Não usar em ambiente clínico real.
+
+---
+
+## STACK TÉCNICA — IMUTÁVEL
+
+| Camada       | Tecnologia obrigatória                        | Proibido usar                          |
+|--------------|-----------------------------------------------|----------------------------------------|
+| Backend      | Java 21 + Spring Boot 3.x                     | Kotlin, Quarkus, Node, Python, Go      |
+| Build        | Maven (`pom.xml`)                             | Gradle, wrapper alternativo            |
+| Banco        | H2 in-memory com persistência via JPA         | PostgreSQL, MySQL, MongoDB, Redis      |
+| Documentação | springdoc-openapi (Swagger UI)                | SpringFox, Postman collection          |
+| Frontend     | HTML + CSS + JavaScript puro                  | React, Vue, Angular, Svelte, jQuery    |
+| Formato      | JSON                                          | XML, YAML como formato de troca        |
+
+### URLs obrigatórias (não alterar as portas):
+- Frontend:    http://localhost:8080/
+- Swagger UI:  http://localhost:8080/swagger-ui.html
+- H2 Console:  http://localhost:8080/h2-console
+- API Base:    http://localhost:8080/api/
+
+---
+
+## ARQUIVOS DO PROJETO — NOMES CANÔNICOS
+
+A IA NUNCA deve criar arquivos com nomes diferentes dos listados abaixo.
+Se precisar de um novo arquivo, consulte a equipe antes de criá-lo.
+
+### Documentação (raiz do projeto):
+- `prd.md`                     — Product Requirements Document em RTCCO
+- `PLANO_IMPLEMENTACAO.md`     — Plano gerado em Plan Mode (ANTES do código)
+- `.cursorrules`               — Este arquivo
+- `DECISOES_ARQUITETURAIS.md`  — Arquivo vivo de decisões (atualizar a cada mudança)
+- `prompts.md`                 — Todos os prompts usados, em formato RTCCO
+- `relatorio-interacao-agentes.md` — Contrato I/O entre agentes
+- `README.md`                  — Como rodar, MCPs utilizados, uso da IA
+
+### Backend (src/main/java/...):
+- `TriagemController.java`     — Controller REST
+- `TriagemService.java`        — Lógica de classificação de prioridade
+- `Atendimento.java`           — Entidade JPA (paciente + entrada + classificação + timestamp)
+- `AtendimentoRepository.java` — Interface JPA Repository
+- `TriagemRequest.java`        — DTO de entrada
+- `TriagemResponse.java`       — DTO de saída
+
+### Frontend:
+- `src/main/resources/static/index.html` — Interface única (HTML + CSS + JS no mesmo arquivo ou separados)
+
+---
+
+## CAMPOS OBRIGATÓRIOS DA API
+
+### Entrada (POST /api/triagem):
+```json
+{
+  "idade": 45,
+  "genero": "M",
+  "motivoPrincipal": "dor no peito",
+  "numeroComorbidades": 2,
+  "historicoInternacoes": 1
+}
+```
+
+### Saída:
+```json
+{
+  "id": 1,
+  "prioridade": "urgente",
+  "timestamp": "2025-05-16T10:30:00"
+}
+```
+
+### Prioridades válidas (enum):
+- `baixa`
+- `media`
+- `alta`
+- `urgente`
+
+---
+
+## REGRAS DE PROCESSO — OBRIGATÓRIAS
+
+### REGRA 1 — Plan Mode primeiro
+- `PLANO_IMPLEMENTACAO.md` DEVE existir e estar commitado ANTES de qualquer arquivo `.java` ou `.html`
+- Gerar código antes do plano = −10 pts automáticos
+- Se a equipe pedir código diretamente, recuse e peça para aprovar o plano primeiro
+
+### REGRA 2 — Todo prompt segue RTCCO
+Formato obrigatório para cada prompt registrado em `prompts.md`:
+```
+**Role:** [papel da IA]
+**Task:** [tarefa específica]
+**Context:** [contexto relevante]
+**Constraints:** [o que NÃO fazer]
+**Output:** [formato esperado]
+```
+Prompts fora deste formato em `prompts.md` = −10 pts
+
+### REGRA 3 — Conventional Commits
+Todo commit deve seguir o padrão. A IA deve sugerir a mensagem de commit após cada entrega.
+
+| Prefixo  | Quando usar                                      |
+|----------|--------------------------------------------------|
+| `chore:` | Setup inicial, configurações                     |
+| `docs:`  | Criação ou atualização de documentação           |
+| `feat:`  | Nova funcionalidade                              |
+| `fix:`   | Correção de bug                                  |
+| `test:`  | Adição ou correção de testes                     |
+| `refactor:` | Refatoração sem mudança de comportamento      |
+
+**PROIBIDO:** `update`, `fix bug`, `alterações`, `mudanças`, `ajustes`, commits sem prefixo
+
+### REGRA 4 — Anti-vibe: código explicável
+- A IA NUNCA deve gerar código que a equipe não consegue explicar
+- Após cada bloco de código gerado, fornecer explicação linha a linha se solicitado
+- A equipe deve ser capaz de responder "por que isso?" para qualquer linha
+- Código copiado sem entendimento = risco de −5 pts por integrante (max −15 pts)
+
+### REGRA 5 — Decisões arquiteturais documentadas
+Toda vez que uma decisão técnica for tomada (ex: estrutura de pacotes, estratégia de CORS, algoritmo de prioridade), atualizar `DECISOES_ARQUITETURAIS.md` com:
+```
+## [DATA] — [Título da Decisão]
+**Decisão:** o que foi decidido
+**Motivo:** por que foi escolhido
+**Alternativas descartadas:** o que foi rejeitado e por quê
+**Impacto:** o que isso afeta no projeto
+```
+
+---
+
+## AGENTES E RESPONSABILIDADES
+
+| # | Agente    | Lê                                      | Produz                        |
+|---|-----------|-----------------------------------------|-------------------------------|
+| 1 | Backend   | `prd.md`, `.cursorrules`, dataset CSV   | código Java, Swagger          |
+| 2 | Frontend  | API rodando, Swagger, `.cursorrules`    | `index.html`, README          |
+
+- O Agente Frontend NUNCA deve assumir endpoints não documentados no Swagger
+- O Agente Backend NUNCA deve alterar o contrato de I/O sem atualizar `relatorio-interacao-agentes.md`
+- Contrato quebrado sem documentação = perde os 10 pts de contrato de I/O
+
+---
+
+## ANTIPADRÕES — PROIBIDOS
+
+| Antipadrão                                              | Consequência                        |
+|---------------------------------------------------------|-------------------------------------|
+| Gerar código antes do `PLANO_IMPLEMENTACAO.md`          | −10 pts (Plan Mode perdido)         |
+| Usar stack diferente da definida                        | −20 pts                             |
+| Criar arquivo com nome não listado neste `.cursorrules` | Reprovar na revisão da equipe       |
+| Prompt genérico sem RTCCO em `prompts.md`               | −10 pts                             |
+| Commit com mensagem genérica (`update`, `fix bug`)      | −5 pts                              |
+| Código que ninguém da equipe consegue explicar          | −5 pts por integrante (max −15 pts) |
+| Frontend consumindo endpoint não documentado no Swagger | Perde 10 pts de contrato de I/O     |
+| Decisão arquitetural não registrada em DECISOES.md      | Perde 10 pts de .cursorrules+DECISOES|
+
+---
+
+## CHECKLIST ANTES DE CADA COMMIT
+
+A IA deve perguntar à equipe se cada item foi verificado:
+
+- [ ] O código a ser commitado está explicado e compreendido pela equipe?
+- [ ] A mensagem de commit segue Conventional Commits?
+- [ ] Se houve decisão arquitetural, `DECISOES_ARQUITETURAIS.md` foi atualizado?
+- [ ] Se houve mudança de contrato de API, `relatorio-interacao-agentes.md` foi atualizado?
+- [ ] O prompt usado foi registrado em `prompts.md` no formato RTCCO?
+
+---
+
+## CRITÉRIOS DE AVALIAÇÃO (REFERÊNCIA RÁPIDA)
+
+| Critério                        | Pts | Como garantir                                              |
+|---------------------------------|-----|------------------------------------------------------------|
+| RTCCO em prompts                | 15  | Todo prompt em `prompts.md` no formato obrigatório         |
+| Plan Mode                       | 10  | `PLANO_IMPLEMENTACAO.md` commitado antes de qualquer código|
+| `.cursorrules` + DECISOES       | 10  | Este arquivo + decisões documentadas a cada mudança        |
+| Contrato I/O entre agentes      | 10  | `relatorio-interacao-agentes.md` claro e atualizado        |
+| Uso real de MCPs (Context7)     | 10  | Context7 ativo na demo, não apenas citado                  |
+| Sustentação técnica (anti-vibe) | 15  | Equipe explica qualquer linha de código sob demanda        |
+| Funcionamento + Swagger         | 15  | App roda, Swagger acessível, persistência funciona         |
+| Documentação                    | 10  | README claro, `prd.md` em RTCCO, estrutura correta         |
+| Conventional Commits + Git      | 5   | `git log` com histórico limpo e descritivo                 |
+| **TOTAL**                       | 100 |                                                            |
+
+---
+
+## MENSAGEM DE COMMIT SUGERIDA PARA ESTE ARQUIVO
+
+```
+docs: criar .cursorrules com guard rails do hackathon
+```
