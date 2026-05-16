@@ -1,6 +1,56 @@
 # Clinifying — Sistema de Triagem Assistida por IA
 
-> **Hackathon ADS** | Stack: Java 21 + Spring Boot 3.x + H2 + HTML/CSS/JS
+> *Classifique. Priorize. Salve tempo.*
+
+![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=flat-square&logo=springboot&logoColor=white)
+![Maven](https://img.shields.io/badge/Build-Maven-C71A36?style=flat-square&logo=apachemaven&logoColor=white)
+![H2](https://img.shields.io/badge/DB-H2_in--memory-1e90ff?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Hackathon-blueviolet?style=flat-square)
+
+---
+
+## Sobre o projeto
+
+**Clinifying** é um sistema de triagem assistida por IA desenvolvido durante o **Hackathon ADS**. O objetivo é demonstrar como a metodologia de desenvolvimento orientado por agentes de IA — com planejamento (Plan Mode), prompts estruturados (RTCCO) e decisões documentadas — pode acelerar a entrega de software de qualidade.
+
+O sistema resolve um problema real de hospitais de emergência: **a falta de triagem padronizada** faz com que pacientes graves aguardem na mesma fila que casos leves, colocando vidas em risco. O Clinifying classifica automaticamente a prioridade de atendimento com base no perfil clínico do paciente no momento da chegada.
+
+> ⚠️ **Aviso ético:** sistema demonstrativo construído sobre dados sintéticos (Synthea). Não utilizar em ambiente clínico real. Triagem médica real exige profissional habilitado.
+
+---
+
+## O que o sistema faz
+
+| Funcionalidade | Detalhe |
+|---------------|--------|
+| 📋 **Cadastro de triagem** | Recepcionista preenche formulário com dados do paciente |
+| 🤖 **Classificação automática** | Algoritmo de 9 passos classifica em `BAIXA` / `MEDIA` / `ALTA` / `URGENTE` |
+| 📊 **Fila ordenada** | Triador visualiza a fila com urgentes sempre no topo |
+| 🗄️ **Persistência H2** | Atendimentos salvos em banco in-memory via ORM (JPA + Hibernate) |
+| 📖 **Swagger UI** | API documentada e testável em `/swagger-ui.html` |
+
+---
+
+## Arquitetura em 30 segundos
+
+```
+[Recepcionista]  →  src/front_end/   (HTML + CSS + JS puro)
+                         │
+                    fetch('/api/triagem')   ← mesmo origin, sem CORS
+                         │
+                    src/back_end/    (Java 21 + Spring Boot 3.x)
+                         │
+                    H2 in-memory     (ORM via JPA + Hibernate)
+```
+
+Monolito empacotado em um único JAR. Um comando para subir tudo:
+
+```bash
+mvn spring-boot:run
+```
+
+Documentação arquitetural completa em **C4 Model** → [`docs/c4model/`](c4model/nivel-1-contexto.md)
 
 ---
 
@@ -142,10 +192,6 @@ feat(front): criar index.html com formulário de triagem
 feat(front): criar style.css com cores por prioridade
 feat(front): criar app.js com chamadas fetch à API
 test(back): adicionar testes unitários do ClassificadorPrioridade
+test(back): adicionar testes de integração do TriagemController
 docs: finalizar README e relatorio-interacao-agentes
-feat: criar frontend index.html com formulário e fila de atendimento
-fix: configurar CORS para permitir chamadas do frontend
-docs: atualizar DECISOES_ARQUITETURAIS após decisão de CORS
-test: adicionar testes unitários do ClassificadorPrioridade
-test: adicionar testes de integração do TriagemController
 ```
