@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clinifying — Sistema de Triagem Assistida por IA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <i class="ti ti-heartbeat" aria-hidden="true"></i>
+      </div>
+      <span class="logo-text">Clini<span>fying</span></span>
+    </div>
+    <div class="header-info">
+      <div class="header-badge">
+        <div class="dot-live"></div>
+        Sistema online
+      </div>
+      <span class="header-clock" id="clock" aria-live="polite" aria-label="Horário atual">--:--:--</span>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- FORMULÁRIO DE TRIAGEM -->
+    <section class="card" aria-label="Formulário de novo atendimento">
+      <div class="card-header">
+        <div class="card-header-icon icon-blue">
+          <i class="ti ti-user-plus" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div class="card-title">Novo Atendimento</div>
+          <div class="card-subtitle">Preencha os dados do paciente para triagem</div>
+        </div>
+      </div>
+
+      <div class="form-body">
+
+        <div class="field">
+          <label for="f-nome">Nome completo</label>
+          <input type="text" id="f-nome" placeholder="Ex: Maria Aparecida Silva" autocomplete="off" />
+          <span class="field-error" id="err-nome">Nome é obrigatório</span>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="f-idade">Idade</label>
+            <input type="number" id="f-idade" placeholder="Ex: 45" min="0" max="130" />
+            <span class="field-error" id="err-idade">Informe uma idade válida</span>
+          </div>
+          <div class="field">
+            <label for="f-genero">Gênero</label>
+            <select id="f-genero">
+              <option value="">Selecione</option>
+              <option value="M">Masculino</option>
+              <option value="F">Feminino</option>
+              <option value="O">Outro / Não informado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="f-motivo">Motivo principal do atendimento</label>
+          <textarea id="f-motivo" placeholder="Ex: Dor no peito com falta de ar há 2 horas"></textarea>
+          <span class="field-error" id="err-motivo">Motivo é obrigatório</span>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="f-comorb">Nº de comorbidades ativas</label>
+            <input type="number" id="f-comorb" placeholder="0" min="0" max="20" value="0" />
+          </div>
+          <div class="field">
+            <label for="f-intern">Internações anteriores</label>
+            <input type="number" id="f-intern" placeholder="0" min="0" max="99" value="0" />
+          </div>
+        </div>
+
+        <button class="btn-submit" id="btn-submit" onclick="registrar()">
+          <span class="spinner" id="spinner"></span>
+          <i class="ti ti-stethoscope" id="btn-icon" aria-hidden="true"></i>
+          <span id="btn-label">Registrar Triagem</span>
+        </button>
+
+      </div>
+
+      <!-- RESULTADO DA CLASSIFICAÇÃO — alimentado pela resposta do POST -->
+      <div class="resultado-box" id="resultado" role="alert" aria-live="polite">
+        <div class="resultado-check" id="resultado-check">
+          <i class="ti ti-check" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div class="resultado-label" id="resultado-label">Prioridade classificada</div>
+          <div class="resultado-nome" id="resultado-nome">—</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- FILA DE ATENDIMENTO — alimentada pelo GET /api/triagem -->
+    <section class="card" aria-label="Fila de atendimento">
+      <div class="card-header">
+        <div class="card-header-icon icon-green">
+          <i class="ti ti-list-check" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div class="card-title">Fila de Atendimento</div>
+          <div class="card-subtitle">Ordenada por prioridade e hora de chegada</div>
+        </div>
+      </div>
+
+      <div class="fila-body">
+
+        <!-- CONTADORES por prioridade -->
+        <div class="fila-stats" role="region" aria-label="Resumo por prioridade">
+          <div class="stat-card stat-urgente">
+            <div class="stat-label">Urgente</div>
+            <div class="stat-value" id="cnt-urgente">0</div>
+          </div>
+          <div class="stat-card stat-alta">
+            <div class="stat-label">Alta</div>
+            <div class="stat-value" id="cnt-alta">0</div>
+          </div>
+          <div class="stat-card stat-media">
+            <div class="stat-label">Média</div>
+            <div class="stat-value" id="cnt-media">0</div>
+          </div>
+          <div class="stat-card stat-baixa">
+            <div class="stat-label">Baixa</div>
+            <div class="stat-value" id="cnt-baixa">0</div>
+          </div>
+        </div>
+
+        <!-- TABELA — campos exatos do contrato GET /api/triagem -->
+        <div class="table-wrap">
+          <table aria-label="Lista de pacientes na fila">
+            <thead>
+              <tr>
+                <th style="width:50px">#</th>
+                <th style="width:170px">Paciente</th>
+                <th style="width:52px">Idade</th>
+                <th>Motivo</th>
+                <th style="width:105px">Prioridade</th>
+                <th style="width:72px">Hora</th>
+              </tr>
+            </thead>
+            <tbody id="fila-body">
+              <tr>
+                <td colspan="6" class="empty-state">
+                  <i class="ti ti-inbox" aria-hidden="true"></i>
+                  Nenhum atendimento registrado
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span class="footer-text">Clinifying — Sistema de Triagem Assistida por IA &middot; Hackathon ADS 2025</span>
+    <span class="footer-warning">⚠ Sistema demonstrativo — não usar em ambiente clínico real</span>
+  </footer>
+
+</div>
+
+<!-- TOAST de notificação -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <i class="ti ti-check" aria-hidden="true"></i>
+  <span id="toast-msg"></span>
+</div>
+
+<script src="js/app.js"></script>
+
+</body>
+</html>
