@@ -56,17 +56,64 @@ Documentação arquitetural completa em **C4 Model** → [`docs/c4model/`](c4mod
 
 ## Como rodar
 
+### Pré-requisitos
+
+| Ferramenta | Versão mínima | Como instalar |
+|-----------|--------------|---------------|
+| **Java (JDK)** | 21 | [Microsoft OpenJDK 21](https://learn.microsoft.com/pt-br/java/openjdk/download) via `winget install Microsoft.OpenJDK.21` |
+| **Maven** | 3.9+ | [apache.org/download](https://maven.apache.org/download.cgi) — extrair e adicionar `bin/` ao `PATH` |
+| **Git** | qualquer | [git-scm.com](https://git-scm.com) |
+
+> **Windows (PowerShell):** após instalar, defina `JAVA_HOME` e adicione ao `PATH` antes de rodar:
+> ```powershell
+> $env:JAVA_HOME = "C:\Program Files\Microsoft\jdk-21.0.x.x-hotspot"
+> $env:PATH = "$env:JAVA_HOME\bin;C:\tools\apache-maven-3.9.x\bin;$env:PATH"
+> ```
+
+---
+
+### Passos — do zero ao sistema rodando
+
 ```bash
-# Na raiz do projeto (onde está o pom.xml)
+# 1. Clone o repositório
+git clone https://github.com/<org>/clinifying.git
+cd clinifying
+
+# 2. Compile e empacote (baixa dependências na primeira vez)
+mvn clean package -DskipTests
+
+# 3. Suba o servidor (backend + frontend no mesmo processo)
 mvn spring-boot:run
 ```
+
+Aguarde a linha de confirmação no terminal:
+
+```
+Started TriagemApplication in X.XXX seconds
+```
+
+### URLs disponíveis
 
 | URL | Descrição |
 |-----|-----------|
 | `http://localhost:8080/` | Interface web (formulário + fila) |
 | `http://localhost:8080/swagger-ui.html` | Documentação Swagger UI |
-| `http://localhost:8080/h2-console` | Console H2 (JDBC URL: `jdbc:h2:mem:triagem`) |
-| `http://localhost:8080/api/triagem` | API REST |
+| `http://localhost:8080/h2-console` | Console H2 — JDBC URL: `jdbc:h2:mem:triagem`, user: `SA`, senha vazia |
+| `http://localhost:8080/api/triagem` | API REST (POST + GET) |
+
+### Testando a API diretamente (opcional)
+
+```bash
+# Registrar triagem
+curl -X POST http://localhost:8080/api/triagem \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"Ana Silva","idade":45,"genero":"F","motivoPrincipal":"dor no peito","numeroComorbidades":1,"historicoInternacoes":0}'
+
+# Listar fila ordenada
+curl http://localhost:8080/api/triagem
+```
+
+> O banco H2 é **in-memory** — os dados são perdidos ao reiniciar o servidor. Isso é intencional (padrão BASE para demonstração).
 
 ---
 
